@@ -1,0 +1,30 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+docker-compose = ">=1.21.0"
+uWSGI = ">=2.0.17"
+Django = ">=2.1"
+django-cors-headers = ">=2.4.0"
+django-redis = ">=4.9.0"
+pyodbc = "*"
+django-pyodbc-azure = "*"
+
+[dev-packages]
+pytest="<3.3"
+pytest-cov=">=2.5.1"
+pytest-django = "<3.3"
+pytest-pythonpath = ">=0.7.3"
+pytest-xdist = ">=1.23"
+pytest-env = ">=0.6.2"
+"flake8" = ">=3.5.0"
+pydocstyle = ">=2.1.1"
+mccabe = ">=0.6.1"
+"pep8-naming" = ">=0.5"
+ipython = "*"
+pytest-sugar = "*"
+
+[requires]
+python_version = "3.7"
