@@ -2,5 +2,4 @@ from django import forms
 
 
 class UploadFileForm(forms.Form):
-    title = forms.CharField(max_length=50, required=False)
-    file = forms.FileField(required=False)
+    docfile = forms.FileField(required=True, label='Select a file', help_text='File to be processed')
