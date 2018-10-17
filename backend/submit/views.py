@@ -21,7 +21,7 @@ tab_names_tournament_type = [
 ]
 
 
-def process_workbook(wb_in: Workbook, wb_out: Workbook):
+def process_workbook(wb_in: Workbook):
     sheet_names = wb_in.sheetnames
 
     # todo: what about insensitive cases?
@@ -32,34 +32,35 @@ def process_workbook(wb_in: Workbook, wb_out: Workbook):
         raise ValidationError('Missing at least one tournament sheet')
 
     for sheet_title in tab_names:
+        print('\nsheet_title ', sheet_title)
         sheet: Worksheet
         sheet = wb_in[sheet_title]
-        new_sheet = wb_out.create_sheet(title=sheet_title)
-        for (row, col), source_cell in sheet._cells.items():
-            target_cell = new_sheet.cell(column=col, row=row)
 
-            target_cell._value = source_cell._value
-            target_cell.data_type = source_cell.data_type
-            #
-            # if source_cell.has_style:
-            #     target_cell._style = copy(source_cell._style)
+        max_row = sheet.max_row
+        max_col = sheet.max_column
+        rows = sheet.iter_rows(min_col=1, max_col=max_col, min_row=1, max_row=max_row)
+
+        for i, row in enumerate(rows, start=1):
+
+            print(i, any(cell.value for cell in row), [cell.value for cell in row])
+            print([cell._value for cell in row])
+            if not any(cell.value for cell in row):
+                sheet.delete_rows(i)
 
 
 def handle_file(uploaded_file):
 
     file_name = uploaded_file.name
     wb_in = load_workbook(uploaded_file)
-    wb_out = Workbook()
-    wb_out.remove_sheet(wb_out.get_active_sheet())
     v_errors = []
     try:
-        process_workbook(wb_in, wb_out)
+        process_workbook(wb_in)
     except ValidationError as errors:
         v_errors = errors
     else:
         new_name = add_timestamp_to_name(file_name)
 
-    return file_name, v_errors, wb_out, new_name
+    return file_name, v_errors, wb_in, new_name
 
 
 def add_timestamp_to_name(uploaded_file_name: str) -> str:
