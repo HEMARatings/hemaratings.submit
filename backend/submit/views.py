@@ -7,6 +7,7 @@ from django.core.files.storage import FileSystemStorage
 from django.forms import forms
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
+from openpyxl.cell import Cell
 from openpyxl.worksheet import Worksheet
 from submit.forms import UploadFileForm
 
@@ -21,8 +22,8 @@ tab_names_tournament_type = [
 ]
 
 
-def process_workbook(wb_in: Workbook):
-    sheet_names = wb_in.sheetnames
+def process_workbook(workbook: Workbook):
+    sheet_names = workbook.sheetnames
 
     # todo: what about insensitive cases?
     if not set(tab_names).issubset(set(sheet_names)):
@@ -31,21 +32,50 @@ def process_workbook(wb_in: Workbook):
     if not set(tab_names).intersection(set(sheet_names)):
         raise ValidationError('Missing at least one tournament sheet')
 
-    for sheet_title in tab_names:
-        print('\nsheet_title ', sheet_title)
-        sheet: Worksheet
-        sheet = wb_in[sheet_title]
+    for sheet_title in sheet_names:
+        remove_empty_rows(sheet_title, workbook)
+        remove_trailing_whitespaces(sheet_title, workbook)
 
-        max_row = sheet.max_row
-        max_col = sheet.max_column
-        rows = sheet.iter_rows(min_col=1, max_col=max_col, min_row=1, max_row=max_row)
+    set_active_tab(workbook)
 
-        for i, row in enumerate(rows, start=1):
 
-            print(i, any(cell.value for cell in row), [cell.value for cell in row])
-            print([cell._value for cell in row])
-            if not any(cell.value for cell in row):
-                sheet.delete_rows(i)
+def set_active_tab(workbook):
+    workbook.active = 0
+    for sheet in workbook:
+        if sheet.title == 'Event info':
+            sheet.sheet_view.tabSelected = True
+        else:
+            sheet.sheet_view.tabSelected = False
+
+
+def remove_empty_rows(sheet_title, workbook) -> None:
+    """ """
+    sheet: Worksheet
+    sheet = workbook[sheet_title]
+    max_row = sheet.max_row
+    max_col = sheet.max_column
+    rows = list(sheet.iter_rows(min_col=1, max_col=max_col, min_row=1, max_row=max_row))
+    i = 1
+    for row in rows:
+        if not any(cell.value for cell in row):
+            sheet.delete_rows(i)
+        else:
+            i += 1
+
+
+def remove_trailing_whitespaces(sheet_title, workbook) -> None:
+    """ """
+    sheet: Worksheet
+    sheet = workbook[sheet_title]
+    max_row = sheet.max_row
+    max_col = sheet.max_column
+    rows = list(sheet.iter_rows(min_col=1, max_col=max_col, min_row=1, max_row=max_row))
+    for row in rows:
+        cell: Cell
+        for cell in row:
+            if cell.data_type == 's':
+                cell.value = cell.value.strip()
+
 
 
 def handle_file(uploaded_file):
