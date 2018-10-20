@@ -13,8 +13,8 @@ from openpyxl.worksheet import Worksheet
 
 from submit.forms import UploadFileForm
 
-tab_names = ["Event info", "Clubs", "Fighters"]
-tab_names_tournament_type = [
+TAB_NAMES = ["Event info", "Clubs", "Fighters"]
+TAB_NAMES_TOURNAMENT_TYPE = [
     "Longsword (Steel, Mixed/Men)",
     "Longsword (Steel, Women)",
     "Longsword (Nylon, Mixed)",
@@ -25,6 +25,10 @@ tab_names_tournament_type = [
     "Sidesword (Steel, Mixed)",
     "Singlestick (Mixed)",
 ]
+COMMON_MISPELLINGS = {
+    "lose": "loss",
+    "tie": "draw",
+}
 
 
 def process_workbook(workbook: Workbook) -> None:
@@ -33,15 +37,15 @@ def process_workbook(workbook: Workbook) -> None:
     sheet_names = workbook.sheetnames
 
     # todo: what about insensitive cases?
-    if not set(tab_names).issubset(set(sheet_names)):
+    if not set(TAB_NAMES).issubset(set(sheet_names)):
         raise ValidationError("Missing core tabs")
 
-    if not set(tab_names).intersection(set(sheet_names)):
+    if not set(TAB_NAMES).intersection(set(sheet_names)):
         raise ValidationError("Missing at least one tournament sheet")
 
     for sheet_title in sheet_names:
         remove_empty_rows(sheet_title, workbook)
-        remove_trailing_whitespaces(sheet_title, workbook)
+        parse_cells(sheet_title, workbook)
 
     set_active_tab(workbook)
 
@@ -60,7 +64,7 @@ def set_active_tab(workbook: Workbook) -> None:
             sheet.sheet_view.tabSelected = False
 
 
-def remove_empty_rows(sheet_title: str, workbook) -> None:
+def remove_empty_rows(sheet_title: str, workbook: Workbook) -> None:
     """ Iterate through rows in sheet and remove when all columns have no value. """
 
     sheet: Worksheet
@@ -76,8 +80,9 @@ def remove_empty_rows(sheet_title: str, workbook) -> None:
             i += 1
 
 
-def remove_trailing_whitespaces(sheet_title, workbook) -> None:
-    """ Iterate through all cells on sheet and remove trailing and leading whitespaces when cell is string type.  """
+def parse_cells(sheet_title: str, workbook: Workbook) -> None:
+    """
+    """
     sheet: Worksheet
     sheet = workbook[sheet_title]
     max_row = sheet.max_row
@@ -86,8 +91,32 @@ def remove_trailing_whitespaces(sheet_title, workbook) -> None:
     for row in rows:
         cell: Cell
         for cell in row:
-            if cell.data_type == "s":
-                cell.value = cell.value.strip()
+            remove_wrong_whitespaces(cell)
+            fixes_result_name(sheet_title, cell)
+
+
+def remove_wrong_whitespaces(cell: Cell) -> None:
+    """
+    Remove trailing and leading whitespaces when cell is string type. It also fixes all duplicated non-standard
+    spaces like new line.
+    """
+
+    if cell.data_type == "s":
+        cell.value = " ".join(cell.value.split())
+
+
+def fixes_result_name(sheet_title: str, cell: Cell) -> None:
+    """
+
+    """
+
+    if sheet_title in TAB_NAMES:
+        return
+
+    if cell.column in ['C', 'D']:
+        if cell.data_type == "s":
+            for wrong, good in COMMON_MISPELLINGS.items():
+                cell.value = cell.value.replace(wrong, good)
 
 
 def handle_file(uploaded_file: InMemoryUploadedFile) -> Tuple[str, List, Workbook, str]:

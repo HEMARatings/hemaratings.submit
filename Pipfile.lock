@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "de29a9ded7598b99ad67667f54627067e8596940828b5a4eb81c91c83b4bc0d7"
+            "sha256": "0f370a4ebfd1b2dd2ee51a36d26d871aaa8d088ed57e0820c30f10d44b0197bd"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -70,10 +70,10 @@
         },
         "docker": {
             "hashes": [
-                "sha256:6c4da20ef40e8d3eaf650f1488d91452b9a1128045481d7169fd34665ffa90ee",
-                "sha256:bc693be5a84b3b9e5aaf156068c5c0a445ee5138c638c3fbc857133bf67ebe07"
+                "sha256:31421f16c01ffbd1ea7353c7e7cd7540bf2e5906d6173eb51c8fea4e0ea38b19",
+                "sha256:fbe82af9b94ccced752527c8de07fa20267f9634b48674ba478a0bb4000a0b1e"
             ],
-            "version": "==3.5.0"
+            "version": "==3.5.1"
         },
         "docker-compose": {
             "hashes": [
@@ -131,10 +131,10 @@
         },
         "openpyxl": {
             "hashes": [
-                "sha256:22904d7bdfaaab33d65d50a0915a65eeb2f29c85d9ec53081563850678a29927"
+                "sha256:022c0f3fa1e873cc0ba20651c54dd5e6276fc4ff150b4060723add4fc448645e"
             ],
             "index": "pypi",
-            "version": "==2.5.8"
+            "version": "==2.5.9"
         },
         "pyodbc": {
             "hashes": [
@@ -238,12 +238,41 @@
             ],
             "version": "==1.5"
         },
+        "appdirs": {
+            "hashes": [
+                "sha256:9e5896d1372858f8dd3344faf4e5014d21849c756c8d5701f78f8a103b372d92",
+                "sha256:d8b24664561d0d34ddfaec54636d502d7cea6e29c3eaf68f3df6180863e2166e"
+            ],
+            "version": "==1.4.3"
+        },
+        "attrs": {
+            "hashes": [
+                "sha256:10cbf6e27dbce8c30807caf056c8eb50917e0eaafe86347671b57254006c3e69",
+                "sha256:ca4be454458f9dec299268d472aaa5a11f67a4ff70093396e1ceae9c76cf4bbb"
+            ],
+            "version": "==18.2.0"
+        },
         "backcall": {
             "hashes": [
                 "sha256:38ecd85be2c1e78f77fd91700c76e14667dc21e2713b63876c0eb901196e01e4",
                 "sha256:bbbf4b1e5cd2bdb08f915895b51081c041bac22394fdfcfdfbe9f14b77c08bf2"
             ],
             "version": "==0.1.0"
+        },
+        "black": {
+            "hashes": [
+                "sha256:817243426042db1d36617910df579a54f1afd659adb96fc5032fcf4b36209739",
+                "sha256:e030a9a28f542debc08acceb273f228ac422798e5215ba2a791a6ddeaaca22a5"
+            ],
+            "index": "pypi",
+            "version": "==18.9b0"
+        },
+        "click": {
+            "hashes": [
+                "sha256:2335065e6395b9e67ca716de5f7526736bfa6ceead690adf616d925bdc622b13",
+                "sha256:5b94b49521f6456670fdb30cd82a4eca9412788a93fa6dd6df72c94d5a8ff2d7"
+            ],
+            "version": "==7.0"
         },
         "coverage": {
             "hashes": [
@@ -332,6 +361,15 @@
                 "sha256:eb2e116e75ecef9d4d228fdc66af54269afa26ab4463042e33785b887c628ba8"
             ],
             "version": "==0.2.0"
+        },
+        "isort": {
+            "hashes": [
+                "sha256:1153601da39a25b14ddc54955dbbacbb6b2d19135386699e2ad58517953b34af",
+                "sha256:b9c40e9750f3d77e6e4d441d8b0266cf555e7cdabdcff33c4fd06366ca761ef8",
+                "sha256:ec9ef8f4a9bc6f71eec99e1806bfa2de401650d996c59330782b89a5555c1497"
+            ],
+            "index": "pypi",
+            "version": "==4.3.4"
         },
         "jedi": {
             "hashes": [
@@ -515,6 +553,14 @@
                 "sha256:1d6d69ce66211143803fbc56652b41d73b4a400a2891d7bf7a1cdf4c02de613b"
             ],
             "version": "==1.1.0"
+        },
+        "toml": {
+            "hashes": [
+                "sha256:229f81c57791a41d65e399fc06bf0848bab550a9dfd5ed66df18ce5f05e73d5c",
+                "sha256:235682dd292d5899d361a811df37e04a8828a5b1da3115886b73cf81ebc9100e",
+                "sha256:f1db651f9657708513243e61e6cc67d101a39bad662eaa9b5546f789338e07a3"
+            ],
+            "version": "==0.10.0"
         },
         "traitlets": {
             "hashes": [

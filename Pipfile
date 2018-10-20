@@ -25,6 +25,8 @@ pydocstyle = ">=2.1.1"
 mccabe = ">=0.6.1"
 "pep8-naming" = ">=0.5"
 ipython = "*"
+black = "==18.9b0"
+isort = "*"
 pytest-sugar = "*"
 
 [requires]
