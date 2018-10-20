@@ -11,6 +11,7 @@ django-cors-headers = ">=2.4.0"
 django-redis = ">=4.9.0"
 pyodbc = "*"
 django-pyodbc-azure = "*"
+openpyxl = "*"
 
 [dev-packages]
 pytest="<3.3"

@@ -1,0 +1,46 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Submit - HEMA Ratings</title>
+    <link href="{% static 'css/base.css' %}" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/solid.css" integrity="sha384-VGP9aw4WtGH/uPAOseYxZ+Vz/vaTb1ehm1bwx92Fm8dTrE+3boLfF1SpAtB1z7HW" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/fontawesome.css" integrity="sha384-1rquJLNOM3ijoueaaeS5m+McXPJCGdr5HcA03/VHXxcp2kX2sUrQDmFc3jR5i/C7" crossorigin="anonymous">
+
+    <!--<script src="//ajax.aspnetcdn.com/ajax/modernizr/modernizr-2.8.3.js"></script>-->
+
+    <meta name="description" content="Performance ratings for competitive HEMA - Submit App">
+    <meta name="author" content="Adam Tokarski">
+
+</head>
+<body>
+
+    {% include "nav.html" %}
+
+    <div id="main" class="container body-content" role="main">
+        <!--[if lt IE 8]>
+        <div class="alert alert-warning" role="alert">
+            <p>You are using an outdated browser. Please <a class="alert-link" href="http://browsehappy.com/">upgrade your
+                browser</a> to improve your experience.</p>
+        </div>
+        <![endif]-->
+
+        <header class="jumbotron">
+            <h1>HEMA Ratings Beta - Submit App</h1>
+            <p class="lead">Performance ratings for competitive HEMA.</p>
+        </header>
+
+            {% block content %}
+            {% endblock %}
+
+        <hr>
+        <footer role="contentinfo">
+            <p>© 2018 - HEMA Ratings Submit App</p>
+        </footer>
+    </div>
+
+</body>
+</html>

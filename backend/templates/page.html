@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <article class="col-md-12" role="article">
+        <header>
+            <h2>
+                <span aria-hidden="true" class="fa fa-upload"></span> <strong>1.</strong> Upload a File
+            </h2>
+        </header>
+        <p>
+            <em>Some info about this uploading</em>
+        </p>
+        <p>
+
+            <form action="que" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                {% if uploaded_file_name %}
+                    <p>uploaded file: <strong>{{ uploaded_file_name }}</strong></p>
+
+                    {% if validation_errors %}
+                        <ul>
+                          {% for error in validation_errors %}
+                                <li>{{ error }}</li>
+                          {% endfor %}
+                        </ul>
+                    {% else  %}
+                        <p>Seems to be fine</p>
+                        <input type="submit" value="Submit to Hema Ratings" name="submit" title="Submit to HemaRatings">
+                        <input type="submit" value="Download" name="download" title="Download locally">
+                    {% endif %}
+
+                {% else %}
+
+                    {{  form.as_p }}
+                    <input type="submit" value="Upload" name="upload">
+                {% endif %}
+
+            </form>
+        </p>
+
+    </article>
+
+{% endblock %}
