@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "0f370a4ebfd1b2dd2ee51a36d26d871aaa8d088ed57e0820c30f10d44b0197bd"
+            "sha256": "8350cedaed079139bd712fa15c1864a0c51f06fa1d97753a1c4eb0cac3f33a29"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -135,6 +135,15 @@
             ],
             "index": "pypi",
             "version": "==2.5.9"
+        },
+        "pycountry": {
+            "hashes": [
+                "sha256:195d8174fd6f98f45622d2885826091fc8b2168184422dac574311073ab8386c",
+                "sha256:7f2aa2529c60f6575af3cd644688b201b97016822ce0ce1c4bcc0f7d08900997",
+                "sha256:ea38f839e719be54dfae1b089cbf1917add6ff8f43a55533d8c7c5799656a848"
+            ],
+            "index": "pypi",
+            "version": "==18.5.26"
         },
         "pyodbc": {
             "hashes": [

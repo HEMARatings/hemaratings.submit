@@ -2,6 +2,7 @@ import os
 from datetime import datetime
 from typing import List, Tuple
 
+import pycountry
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.handlers.wsgi import WSGIRequest
@@ -29,6 +30,10 @@ COMMON_MISPELLINGS = {
     "lose": "loss",
     "tie": "draw",
 }
+COUNTRIES_COORDINATES = {
+    ("Clubs", "B", ),
+    ("Fighters", "C"),
+}
 
 
 def process_workbook(workbook: Workbook) -> None:
@@ -46,6 +51,7 @@ def process_workbook(workbook: Workbook) -> None:
     for sheet_title in sheet_names:
         remove_empty_rows(sheet_title, workbook)
         parse_cells(sheet_title, workbook)
+        fix_country_name(sheet_title, workbook)
 
     set_active_tab(workbook)
 
@@ -117,6 +123,30 @@ def fixes_result_name(sheet_title: str, cell: Cell) -> None:
         if cell.data_type == "s":
             for wrong, good in COMMON_MISPELLINGS.items():
                 cell.value = cell.value.replace(wrong, good)
+
+
+def fix_country_name(sheet_title: str, workbook: Workbook) -> None:
+    sheet: Worksheet
+    sheet = workbook[sheet_title]
+    for country_coordinate in COUNTRIES_COORDINATES:
+        if sheet_title == country_coordinate[0]:
+            column = sheet[country_coordinate[1]]
+            for cell in column:
+                try:
+                    as_name = pycountry.countries.get(name=cell.value.capitalize())
+                except KeyError:
+                    as_name = None
+                else:
+                    cell.value = as_name.alpha_2
+
+                try:
+                    as_alpha_3 = pycountry.countries.get(name=cell.value.upper())
+                except KeyError:
+                    as_alpha_3 = None
+                else:
+                    cell.value = as_alpha_3.alpha_2
+
+                cell.value = cell.value.upper()
 
 
 def handle_file(uploaded_file: InMemoryUploadedFile) -> Tuple[str, List, Workbook, str]:

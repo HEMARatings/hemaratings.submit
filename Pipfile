@@ -12,6 +12,7 @@ django-redis = ">=4.9.0"
 pyodbc = "*"
 django-pyodbc-azure = "*"
 openpyxl = "*"
+pycountry = "*"
 
 [dev-packages]
 pytest="<3.3"
