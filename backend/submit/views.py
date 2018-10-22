@@ -59,6 +59,7 @@ def process_workbook(workbook: Workbook) -> None:
         remove_empty_rows(sheet_title, workbook)
         parse_cells(sheet_title, workbook)
         fix_country_name(sheet_title, workbook)
+        verify_results(sheet_title, workbook)
 
     verify_users(workbook)
 
@@ -163,18 +164,32 @@ def verify_users(workbook: Workbook) -> None:
     ...
 
 
+def verify_results(sheet_title: str, workbook: Workbook) -> None:
+    if sheet_title in TAB_NAMES:
+        return
+
+    sheet: Worksheet
+    sheet = workbook[sheet_title]
+
+    max_row = sheet.max_row
+    rows = list(sheet.iter_rows(min_col=3, max_col=4, min_row=2, max_row=max_row))
+    for row in rows:
+        f1, f2 = row[0].value.lower(), row[1].value.lower()
+        if not ((f1 == 'win' and f2 == 'loss') or (f1 == 'loss' and f2 == 'win') or (f1 == 'draw' and f2 == 'draw')):
+            raise ValidationError(f"Wrong results at sheet '{sheet_title}' ({f1} and {f2})")
+
+
 def handle_file(uploaded_file: InMemoryUploadedFile) -> Tuple[str, List, Workbook, str]:
     """ Handle uploaded file. Calls processing method then creates new name for file with timestamp. """
 
     file_name = uploaded_file.name
     wb_in = load_workbook(uploaded_file)
     v_errors = []
+    new_name = add_timestamp_to_name(file_name)
     try:
         process_workbook(wb_in)
     except ValidationError as errors:
         v_errors = errors
-    else:
-        new_name = add_timestamp_to_name(file_name)
 
     return file_name, v_errors, wb_in, new_name
 

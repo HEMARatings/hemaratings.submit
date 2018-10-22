@@ -20,9 +20,9 @@
                     <p>uploaded file: <strong>{{ uploaded_file_name }}</strong></p>
 
                     {% if validation_errors %}
-                        <ul>
+                        <ul class="has-error">
                           {% for error in validation_errors %}
-                                <li>{{ error }}</li>
+                                <li class="help-block">{{ error }}</li>
                           {% endfor %}
                         </ul>
                     {% else  %}
