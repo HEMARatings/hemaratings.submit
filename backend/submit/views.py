@@ -35,6 +35,13 @@ COUNTRIES_COORDINATES = {
     ("Fighters", "C"),
 }
 
+# 1. checks if there are core tabs ("Event info", "Clubs", "Fighters") and at least one tournament sheet
+# 2. removes empty rows on all sheets
+# 3. remove whitespaces (leading, trailing and doubled ones)
+# 4. replaces results misspelling ("lose", "tie")
+# 5. fixes country names
+# 6. sets first tab as active
+
 
 def process_workbook(workbook: Workbook) -> None:
     """ Main method to process workbook sheets. """
@@ -52,6 +59,8 @@ def process_workbook(workbook: Workbook) -> None:
         remove_empty_rows(sheet_title, workbook)
         parse_cells(sheet_title, workbook)
         fix_country_name(sheet_title, workbook)
+
+    verify_users(workbook)
 
     set_active_tab(workbook)
 
@@ -132,21 +141,26 @@ def fix_country_name(sheet_title: str, workbook: Workbook) -> None:
         if sheet_title == country_coordinate[0]:
             column = sheet[country_coordinate[1]]
             for cell in column:
-                try:
-                    as_name = pycountry.countries.get(name=cell.value.capitalize())
-                except KeyError:
-                    as_name = None
-                else:
-                    cell.value = as_name.alpha_2
+                if cell.value:
+                    try:
+                        as_name = pycountry.countries.get(name=cell.value.capitalize())
+                    except KeyError:
+                        as_name = None
+                    else:
+                        cell.value = as_name.alpha_2
 
-                try:
-                    as_alpha_3 = pycountry.countries.get(name=cell.value.upper())
-                except KeyError:
-                    as_alpha_3 = None
-                else:
-                    cell.value = as_alpha_3.alpha_2
+                    try:
+                        as_alpha_3 = pycountry.countries.get(alpha_3=cell.value.upper())
+                    except KeyError:
+                        as_alpha_3 = None
+                    else:
+                        cell.value = as_alpha_3.alpha_2
 
-                cell.value = cell.value.upper()
+                    cell.value = cell.value.upper()
+
+
+def verify_users(workbook: Workbook) -> None:
+    ...
 
 
 def handle_file(uploaded_file: InMemoryUploadedFile) -> Tuple[str, List, Workbook, str]:
