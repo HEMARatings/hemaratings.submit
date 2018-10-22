@@ -13,185 +13,23 @@ from openpyxl.cell import Cell
 from openpyxl.worksheet import Worksheet
 
 from submit.forms import UploadFileForm
-
-TAB_NAMES = ["Event info", "Clubs", "Fighters"]
-TAB_NAMES_TOURNAMENT_TYPE = [
-    "Longsword (Steel, Mixed/Men)",
-    "Longsword (Steel, Women)",
-    "Longsword (Nylon, Mixed)",
-    "Rapier &amp; Dagger (Mixed)",
-    "Single Rapier (Mixed)",
-    "Sabre (Steel, Mixed/Men)",
-    "Sword &amp; Buckler (Steel, Mixed)",
-    "Sidesword (Steel, Mixed)",
-    "Singlestick (Mixed)",
-]
-COMMON_MISPELLINGS = {
-    "lose": "loss",
-    "tie": "draw",
-}
-COUNTRIES_COORDINATES = {
-    ("Clubs", "B", ),
-    ("Fighters", "C"),
-}
-
-# 1. checks if there are core tabs ("Event info", "Clubs", "Fighters") and at least one tournament sheet
-# 2. removes empty rows on all sheets
-# 3. remove whitespaces (leading, trailing and doubled ones)
-# 4. replaces results misspelling ("lose", "tie")
-# 5. fixes country names
-# 6. sets first tab as active
-
-
-def process_workbook(workbook: Workbook) -> None:
-    """ Main method to process workbook sheets. """
-
-    sheet_names = workbook.sheetnames
-
-    # todo: what about insensitive cases?
-    if not set(TAB_NAMES).issubset(set(sheet_names)):
-        raise ValidationError("Missing core tabs")
-
-    if not set(TAB_NAMES).intersection(set(sheet_names)):
-        raise ValidationError("Missing at least one tournament sheet")
-
-    for sheet_title in sheet_names:
-        remove_empty_rows(sheet_title, workbook)
-        parse_cells(sheet_title, workbook)
-        fix_country_name(sheet_title, workbook)
-        verify_results(sheet_title, workbook)
-
-    verify_users(workbook)
-
-    set_active_tab(workbook)
-
-
-def set_active_tab(workbook: Workbook) -> None:
-    """
-    Set first tab as active by default. workbook.active should be enough but for some reason it does not deactivate
-    previously selected one, so we have to iterate through them.
-    """
-
-    workbook.active = 0
-    for sheet in workbook:
-        if sheet.title == "Event info":
-            sheet.sheet_view.tabSelected = True
-        else:
-            sheet.sheet_view.tabSelected = False
-
-
-def remove_empty_rows(sheet_title: str, workbook: Workbook) -> None:
-    """ Iterate through rows in sheet and remove when all columns have no value. """
-
-    sheet: Worksheet
-    sheet = workbook[sheet_title]
-    max_row = sheet.max_row
-    max_col = sheet.max_column
-    rows = list(sheet.iter_rows(min_col=1, max_col=max_col, min_row=1, max_row=max_row))
-    i = 1
-    for row in rows:
-        if not any(cell.value for cell in row):
-            sheet.delete_rows(i)
-        else:
-            i += 1
-
-
-def parse_cells(sheet_title: str, workbook: Workbook) -> None:
-    """
-    """
-    sheet: Worksheet
-    sheet = workbook[sheet_title]
-    max_row = sheet.max_row
-    max_col = sheet.max_column
-    rows = list(sheet.iter_rows(min_col=1, max_col=max_col, min_row=1, max_row=max_row))
-    for row in rows:
-        cell: Cell
-        for cell in row:
-            remove_wrong_whitespaces(cell)
-            fixes_result_name(sheet_title, cell)
-
-
-def remove_wrong_whitespaces(cell: Cell) -> None:
-    """
-    Remove trailing and leading whitespaces when cell is string type. It also fixes all duplicated non-standard
-    spaces like new line.
-    """
-
-    if cell.data_type == "s":
-        cell.value = " ".join(cell.value.split())
-
-
-def fixes_result_name(sheet_title: str, cell: Cell) -> None:
-    """
-
-    """
-
-    if sheet_title in TAB_NAMES:
-        return
-
-    if cell.column in ['C', 'D']:
-        if cell.data_type == "s":
-            for wrong, good in COMMON_MISPELLINGS.items():
-                cell.value = cell.value.replace(wrong, good)
-
-
-def fix_country_name(sheet_title: str, workbook: Workbook) -> None:
-    sheet: Worksheet
-    sheet = workbook[sheet_title]
-    for country_coordinate in COUNTRIES_COORDINATES:
-        if sheet_title == country_coordinate[0]:
-            column = sheet[country_coordinate[1]]
-            for cell in column:
-                if cell.value:
-                    try:
-                        as_name = pycountry.countries.get(name=cell.value.capitalize())
-                    except KeyError:
-                        as_name = None
-                    else:
-                        cell.value = as_name.alpha_2
-
-                    try:
-                        as_alpha_3 = pycountry.countries.get(alpha_3=cell.value.upper())
-                    except KeyError:
-                        as_alpha_3 = None
-                    else:
-                        cell.value = as_alpha_3.alpha_2
-
-                    cell.value = cell.value.upper()
-
-
-def verify_users(workbook: Workbook) -> None:
-    ...
-
-
-def verify_results(sheet_title: str, workbook: Workbook) -> None:
-    if sheet_title in TAB_NAMES:
-        return
-
-    sheet: Worksheet
-    sheet = workbook[sheet_title]
-
-    max_row = sheet.max_row
-    rows = list(sheet.iter_rows(min_col=3, max_col=4, min_row=2, max_row=max_row))
-    for row in rows:
-        f1, f2 = row[0].value.lower(), row[1].value.lower()
-        if not ((f1 == 'win' and f2 == 'loss') or (f1 == 'loss' and f2 == 'win') or (f1 == 'draw' and f2 == 'draw')):
-            raise ValidationError(f"Wrong results at sheet '{sheet_title}' ({f1} and {f2})")
+from submit.workbook_validator import WorkbookValidator
 
 
 def handle_file(uploaded_file: InMemoryUploadedFile) -> Tuple[str, List, Workbook, str]:
     """ Handle uploaded file. Calls processing method then creates new name for file with timestamp. """
 
     file_name = uploaded_file.name
-    wb_in = load_workbook(uploaded_file)
+    workbook = load_workbook(uploaded_file)
     v_errors = []
     new_name = add_timestamp_to_name(file_name)
+    workbook_validator = WorkbookValidator(workbook=workbook)
     try:
-        process_workbook(wb_in)
+        workbook_validator.process_workbook()
     except ValidationError as errors:
         v_errors = errors
 
-    return file_name, v_errors, wb_in, new_name
+    return file_name, v_errors, workbook, new_name
 
 
 def add_timestamp_to_name(uploaded_file_name: str) -> str:
