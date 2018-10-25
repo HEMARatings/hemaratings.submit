@@ -2,7 +2,7 @@ import pycountry
 from django.core.exceptions import ValidationError
 from openpyxl import Workbook
 from openpyxl.cell import Cell
-from openpyxl.conftest import Worksheet
+from openpyxl.worksheet import Worksheet
 
 TAB_NAMES = ["Event info", "Clubs", "Fighters"]
 TAB_NAMES_TOURNAMENT_TYPE = [
