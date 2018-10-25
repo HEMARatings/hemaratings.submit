@@ -1,10 +1,6 @@
 version: '2'
 
 services:
-    redis:
-        image: redis:latest
-        expose:
-            - 6379:6379
     backend:
         environment:
             REDIS_URI: $REDIS_URI
@@ -13,8 +9,7 @@ services:
             dockerfile: ./docker/django/Dockerfile
         volumes:
             - ./backend:/opt/app/backend
-        depends_on:
-            - redis
+            - ./config/dev/nginx.conf:/etc/nginx/sites-enabled/default
         ports:
             - 8000:80
-        command: "/opt/app/backend/init.sh"
+        command: "/opt/app/backend/scripts/init.sh"

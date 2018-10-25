@@ -4,7 +4,10 @@ HEMA Ratings Submit app
 
 ## Installation
 ### Docker
-todo
+```
+make build
+make run-dev
+```
 
 ### local dev instance 
 1. Install ODBC Driver 

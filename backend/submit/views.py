@@ -2,6 +2,7 @@ import os
 from datetime import datetime
 from typing import List, Tuple
 
+import pycountry
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.handlers.wsgi import WSGIRequest
@@ -12,98 +13,23 @@ from openpyxl.cell import Cell
 from openpyxl.worksheet import Worksheet
 
 from submit.forms import UploadFileForm
-
-tab_names = ["Event info", "Clubs", "Fighters"]
-tab_names_tournament_type = [
-    "Longsword (Steel, Mixed/Men)",
-    "Longsword (Steel, Women)",
-    "Longsword (Nylon, Mixed)",
-    "Rapier &amp; Dagger (Mixed)",
-    "Single Rapier (Mixed)",
-    "Sabre (Steel, Mixed/Men)",
-    "Sword &amp; Buckler (Steel, Mixed)",
-    "Sidesword (Steel, Mixed)",
-    "Singlestick (Mixed)",
-]
-
-
-def process_workbook(workbook: Workbook) -> None:
-    """ Main method to process workbook sheets. """
-
-    sheet_names = workbook.sheetnames
-
-    # todo: what about insensitive cases?
-    if not set(tab_names).issubset(set(sheet_names)):
-        raise ValidationError("Missing core tabs")
-
-    if not set(tab_names).intersection(set(sheet_names)):
-        raise ValidationError("Missing at least one tournament sheet")
-
-    for sheet_title in sheet_names:
-        remove_empty_rows(sheet_title, workbook)
-        remove_trailing_whitespaces(sheet_title, workbook)
-
-    set_active_tab(workbook)
-
-
-def set_active_tab(workbook: Workbook) -> None:
-    """
-    Set first tab as active by default. workbook.active should be enough but for some reason it does not deactivate
-    previously selected one, so we have to iterate through them.
-    """
-
-    workbook.active = 0
-    for sheet in workbook:
-        if sheet.title == "Event info":
-            sheet.sheet_view.tabSelected = True
-        else:
-            sheet.sheet_view.tabSelected = False
-
-
-def remove_empty_rows(sheet_title: str, workbook) -> None:
-    """ Iterate through rows in sheet and remove when all columns have no value. """
-
-    sheet: Worksheet
-    sheet = workbook[sheet_title]
-    max_row = sheet.max_row
-    max_col = sheet.max_column
-    rows = list(sheet.iter_rows(min_col=1, max_col=max_col, min_row=1, max_row=max_row))
-    i = 1
-    for row in rows:
-        if not any(cell.value for cell in row):
-            sheet.delete_rows(i)
-        else:
-            i += 1
-
-
-def remove_trailing_whitespaces(sheet_title, workbook) -> None:
-    """ Iterate through all cells on sheet and remove trailing and leading whitespaces when cell is string type.  """
-    sheet: Worksheet
-    sheet = workbook[sheet_title]
-    max_row = sheet.max_row
-    max_col = sheet.max_column
-    rows = list(sheet.iter_rows(min_col=1, max_col=max_col, min_row=1, max_row=max_row))
-    for row in rows:
-        cell: Cell
-        for cell in row:
-            if cell.data_type == "s":
-                cell.value = cell.value.strip()
+from submit.workbook_validator import WorkbookValidator
 
 
 def handle_file(uploaded_file: InMemoryUploadedFile) -> Tuple[str, List, Workbook, str]:
     """ Handle uploaded file. Calls processing method then creates new name for file with timestamp. """
 
     file_name = uploaded_file.name
-    wb_in = load_workbook(uploaded_file)
+    workbook = load_workbook(uploaded_file)
     v_errors = []
+    new_name = add_timestamp_to_name(file_name)
+    workbook_validator = WorkbookValidator(workbook=workbook)
     try:
-        process_workbook(wb_in)
+        workbook_validator.process_workbook()
     except ValidationError as errors:
         v_errors = errors
-    else:
-        new_name = add_timestamp_to_name(file_name)
 
-    return file_name, v_errors, wb_in, new_name
+    return file_name, v_errors, workbook, new_name
 
 
 def add_timestamp_to_name(uploaded_file_name: str) -> str:

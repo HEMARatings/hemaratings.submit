@@ -1,4 +1,5 @@
-from django.conf.urls import url
+from config import settings
+from django.conf.urls import url, static
 from django.contrib import admin
 
 from submit.views import index
@@ -6,4 +7,4 @@ from submit.views import index
 urlpatterns = [url(r"admin/", admin.site.urls), url(r"", index, name="index")]
 
 # urlpatterns += static.static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-# urlpatterns += static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+urlpatterns += static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

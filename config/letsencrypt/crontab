@@ -1,0 +1,1 @@
+0 0 * * * root /opt/certbot renew --non-interactive --config /opt/app/config/letsencrypt/config.ini --agree-tos >> /var/log/cron.log 2>&1
