@@ -109,3 +109,4 @@ venv.bak/
 
 temp/
 backend/static_root/
+backend/media/

@@ -23,6 +23,9 @@ INSTALLED_APPS = (
     "django.contrib.messages",
     "django.contrib.sessions",
     "django.contrib.admin",
+
+    "formtools",
+
     "corsheaders",
     "submit",
 )
@@ -52,6 +55,9 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+MEDIA_ROOT = 'media'
+MEDIA_URL = '/media/'
 
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "static_root")

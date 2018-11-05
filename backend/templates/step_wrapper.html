@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block head %}
+    {{ wizard.form.media }}
+{% endblock %}
+
+{% block content %}
+    <p>Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</p>
+    <form action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {% block step_content %}
+        {% endblock %}
+
+        {% if wizard.steps.prev %}
+                <button name="wizard_goto_step" type="submit"
+                        value="{{ wizard.steps.first }}">{% trans "first step" %}</button>
+                <button name="wizard_goto_step" type="submit"
+                        value="{{ wizard.steps.prev }}">{% trans "prev step" %}</button>
+        {% endif %}
+        <input type="submit" value="{% trans "next step" %}"/>
+    </form>
+{% endblock %}
