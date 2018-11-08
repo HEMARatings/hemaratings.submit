@@ -43,9 +43,8 @@ class WorkbookValidator:
         self.sheet_names = workbook.sheetnames
         self.errors = []
 
-    def process_workbook(self) -> None:
-        """ Main method to process workbook sheets. """
-
+    def check_basic_errors(self) -> None:
+        """ """
         # todo: what about insensitive cases?
         if not set(TAB_NAMES).issubset(set(self.sheet_names)):
             missing = set(TAB_NAMES) - set(self.sheet_names)
@@ -54,19 +53,34 @@ class WorkbookValidator:
         if not set(TAB_NAMES).intersection(set(self.sheet_names)):
             self.errors.append(ValidationError("Missing at least one tournament sheet"))
 
-        for sheet_title in self.sheet_names:
-            self.remove_empty_rows(sheet_title)
-            self.parse_cells(sheet_title)
-            self.fix_country_name(sheet_title)
-            self.verify_results(sheet_title)
-
-        self.verify_users()
-        self.set_active_tab()
-
         if self.errors:
             raise ValidationError(self.errors)
 
-    def remove_empty_rows(self, sheet_title: str) -> None:
+    def fix_automatically_errors(self) -> None:
+        for sheet_title in self.sheet_names:
+            self._remove_empty_rows(sheet_title)
+            self._parse_cells(sheet_title)
+            self.fix_country_name(sheet_title)
+
+        self._set_active_tab()
+
+
+    # def process_workbook(self) -> None:
+    #     """ Main method to process workbook sheets. """
+    #
+    #     for sheet_title in self.sheet_names:
+    #         self._remove_empty_rows(sheet_title)
+    #         self._parse_cells(sheet_title)
+    #         self.fix_country_name(sheet_title)
+    #         self.verify_results(sheet_title)
+    #
+    #     self.verify_users()
+    #     self._set_active_tab()
+    #
+    #     if self.errors:
+    #         raise ValidationError(self.errors)
+
+    def _remove_empty_rows(self, sheet_title: str) -> None:
         """ Iterate through rows in sheet and remove when all columns have no value. """
 
         sheet: Worksheet
@@ -81,7 +95,7 @@ class WorkbookValidator:
             else:
                 i += 1
 
-    def parse_cells(self, sheet_title: str) -> None:
+    def _parse_cells(self, sheet_title: str) -> None:
         """
         """
         sheet: Worksheet
@@ -92,10 +106,10 @@ class WorkbookValidator:
         for row in rows:
             cell: Cell
             for cell in row:
-                self.remove_wrong_whitespaces(cell)
-                self.fixes_result_name(sheet_title, cell)
+                self._remove_wrong_whitespaces(cell)
+                self._fixes_result_name(sheet_title, cell)
 
-    def remove_wrong_whitespaces(self, cell: Cell) -> None:
+    def _remove_wrong_whitespaces(self, cell: Cell) -> None:
         """
         Remove trailing and leading whitespaces when cell is string type. It also fixes all duplicated non-standard
         spaces like new line.
@@ -104,7 +118,7 @@ class WorkbookValidator:
         if cell.data_type == "s":
             cell.value = " ".join(cell.value.split())
 
-    def fixes_result_name(self, sheet_title: str, cell: Cell) -> None:
+    def _fixes_result_name(self, sheet_title: str, cell: Cell) -> None:
         """
         """
 
@@ -140,27 +154,27 @@ class WorkbookValidator:
 
                         cell.value = cell.value.upper()
 
-    def verify_users(self) -> None:
-        ...
+    # def verify_users(self) -> None:
+    #     ...
+    #
+    # def verify_results(self, sheet_title: str) -> None:
+    #     if sheet_title in TAB_NAMES:
+    #         return
+    #
+    #     sheet: Worksheet
+    #     sheet = self.workbook[sheet_title]
+    #
+    #     max_row = sheet.max_row
+    #     rows = list(sheet.iter_rows(min_col=1, max_col=4, min_row=2, max_row=max_row))
+    #     for row in rows:
+    #         f1, f2 = (row[2].value or '').lower(), (row[3].value or '').lower()
+    #         if not ((f1 == 'win' and f2 == 'loss') or (f1 == 'loss' and f2 == 'win') or (f1 == 'draw' and f2 == 'draw')):
+    #             self.errors.append(ValidationError(
+    #                 f"Wrong results at sheet '{sheet_title}' ({f1} and {f2}) - "
+    #                 f"Col {row[0].row}: {row[0].value} vs {row[1].value}"
+    #             ))
 
-    def verify_results(self, sheet_title: str) -> None:
-        if sheet_title in TAB_NAMES:
-            return
-
-        sheet: Worksheet
-        sheet = self.workbook[sheet_title]
-
-        max_row = sheet.max_row
-        rows = list(sheet.iter_rows(min_col=1, max_col=4, min_row=2, max_row=max_row))
-        for row in rows:
-            f1, f2 = (row[2].value or '').lower(), (row[3].value or '').lower()
-            if not ((f1 == 'win' and f2 == 'loss') or (f1 == 'loss' and f2 == 'win') or (f1 == 'draw' and f2 == 'draw')):
-                self.errors.append(ValidationError(
-                    f"Wrong results at sheet '{sheet_title}' ({f1} and {f2}) - "
-                    f"Col {row[0].row}: {row[0].value} vs {row[1].value}"
-                ))
-
-    def set_active_tab(self) -> None:
+    def _set_active_tab(self) -> None:
         """
         Set first tab as active by default. workbook.active should be enough but for some reason it does not deactivate
         previously selected one, so we have to iterate through them.

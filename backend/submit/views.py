@@ -9,6 +9,7 @@ from django.core.files.storage import FileSystemStorage
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponse, HttpResponseRedirect
+from django.utils.crypto import get_random_string
 from django.shortcuts import render
 from formtools.wizard.views import SessionWizardView
 from openpyxl import Workbook, load_workbook
@@ -37,59 +38,49 @@ TEMPLATES = {
 class SubmitWizard(SessionWizardView):
 
     file_storage = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'uploaded_files'))
+    uploaded_file = None
 
     def get_template_names(self):
-        print("os.path.join(settings.MEDIA_ROOT, 'uploaded_files')", os.path.join(settings.MEDIA_ROOT, 'uploaded_files'))
         return [TEMPLATES[self.steps.current]]
 
-    def get_context_data(self, form, **kwargs):
-        print('get_context_data', form)
-        print('self.steps.current', self.steps.current)
-
-        return super().get_context_data(form, **kwargs)
-
-    def process_step(self, form):
-        print('process_step')
-        return super().process_step(form)
-
     def process_step_files(self, form):
-        print('process_step_files')
         files = super().process_step_files(form)
-        print('files', files)
+
+        if self.steps.current == 'file_upload':
+            try:
+                self.uploaded_file = files['file_upload-docfile']
+            except KeyError:
+                # todo: it shouldn't happen, but let's build some nice message
+                raise
+            else:
+                self.fix_weak_errors()
+
         return files
 
     def done(self, form_list, form_dict, **kwargs):
-        print('form_list', form_list)
-        print('form_dict', form_dict)
-        print('*'*20, 'done')
-        return HttpResponseRedirect('/page-to-redirect-to-when-done/')
+        return HttpResponseRedirect('/')
 
-#
-# def handle_file(uploaded_file: InMemoryUploadedFile) -> Tuple[str, List, Workbook, str]:
-#     """ Handle uploaded file. Calls processing method then creates new name for file with timestamp. """
-#
-#     file_name = uploaded_file.name
-#     workbook = load_workbook(uploaded_file)
-#     v_errors = []
-#     new_name = add_timestamp_to_name(file_name)
-#     workbook_validator = WorkbookValidator(workbook=workbook)
-#     try:
-#         workbook_validator.process_workbook()
-#     except ValidationError as errors:
-#         v_errors = errors
-#
-#     return file_name, v_errors, workbook, new_name
-#
-#
-# def add_timestamp_to_name(uploaded_file_name: str) -> str:
-#     """ Helper method which extend filename with timestamp. """
-#
-#     splitted_name = os.path.splitext(uploaded_file_name)
-#     new_name = (
-#         f"{splitted_name[0]}.{datetime.now().strftime('%Y%m%d%H%M')}{splitted_name[1]}"
-#     )
-#     return new_name
-#
+    def fix_weak_errors(self):
+        file_name = self.uploaded_file.name
+        dirname = f"{datetime.now().strftime('%Y%m%d%H%M%S%f')}_{get_random_string(length=4)}"
+        filename = os.path.join(dirname, file_name)
+
+        full_path = self.storage.file_storage.path(filename)
+        full_path_root, full_path_ext = os.path.splitext(full_path)
+        full_path_parsed = f'{full_path_root}.parsed{full_path_ext}'
+        directory = os.path.dirname(full_path)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        workbook = load_workbook(self.uploaded_file)
+        workbook.save(full_path)
+
+        workbook_validator = WorkbookValidator(workbook=workbook)
+        workbook_validator.fix_automatically_errors()
+        workbook.save(full_path_parsed)
+
+
+
 #
 # def index(request: WSGIRequest) -> HttpResponse:
 #     """ Main view. """
