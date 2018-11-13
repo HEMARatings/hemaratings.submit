@@ -13,3 +13,8 @@ services:
         ports:
             - 8000:80
         command: "/opt/app/backend/scripts/init.sh"
+
+    redis:
+        image: redis:latest
+        expose:
+          - "6379"
