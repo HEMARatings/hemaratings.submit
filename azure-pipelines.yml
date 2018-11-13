@@ -7,7 +7,7 @@ pool:
   vmImage: 'Ubuntu 16.04'
 
 variables:
-  imageName: 'hemaratings-submitter:$(build.buildId)'
+  imageName: 'hemaratings-submitter-$(build.buildId)'
 
 steps:
 - script: docker build -f docker/django/Dockerfile -t $(imageName):$(dockerId).azurecr.io/$(imageName) .
