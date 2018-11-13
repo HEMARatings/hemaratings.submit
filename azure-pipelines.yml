@@ -12,3 +12,6 @@ variables:
 steps:
 - script: docker build -f docker/django/Dockerfile -t $(imageName) .
   displayName: 'docker build'
+- script: |
+    docker login -u $(dockerId).azurecr.io -p $(pswd) $(dockerid).azurecr.io
+    docker push $(dockerId).azurecr.io/$(imageName)
