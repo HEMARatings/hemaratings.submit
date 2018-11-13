@@ -14,5 +14,5 @@ steps:
   displayName: 'docker build'
 - script: |
     docker login -u $(dockerId) -p $(dockerPassword) $(dockerid).azurecr.io    
-        docker push $(dockerId).azurecr.io/$(imageName):$(build.buildId)
+    docker push $(dockerId).azurecr.io/$(imageName):$(build.buildId)
   displayName: 'Publish to Azure Container Registry'
