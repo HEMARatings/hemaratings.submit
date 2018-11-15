@@ -7,15 +7,18 @@ pool:
   vmImage: 'Ubuntu 16.04'
 
 variables:
-  imageName: '$(dockerId).azurecr.io/hemaratings-submitter:$(build.buildId)'
+  imageName: '$(dockerId).azurecr.io/hemaratings-submitter'
 
 steps:
 #- script: docker build -f docker/django/Dockerfile -t $(imageName) .
   #displayName: 'docker build'
-- script: docker-compose --project-name $(imageName) up -d --build backend
+- script: docker-compose up -d --build backend
   displayName: 'docker compose'
 
 - script: |
     docker login -u $(dockerId) -p $(dockerPassword) $(dockerid).azurecr.io
+    docker tag hemaratingssubmit  $(imageName):$(build.buildId)
+    docker tag hemaratingssubmit  $(imageName):latest
     docker push $(imageName)
+    
   displayName: 'Publish to Azure Container Registry'
