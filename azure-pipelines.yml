@@ -12,10 +12,10 @@ variables:
 steps:
 #- script: docker build -f docker/django/Dockerfile -t $(imageName) .
   #displayName: 'docker build'
-- script: docker-compose up -d --build backend
+- script: docker-compose up -d --build backend --project-name $(imageName)
   displayName: 'docker compose'
 
 - script: |
-    docker login -u $(dockerId) -p $(dockerPassword) $(dockerid).azurecr.io    
+    docker login -u $(dockerId) -p $(dockerPassword) $(dockerid).azurecr.io
     docker push $(imageName)
   displayName: 'Publish to Azure Container Registry'
