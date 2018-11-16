@@ -9,10 +9,12 @@ pool:
 variables:
   imageName: '$(dockerId).azurecr.io/hemaratings-submitter'
 
+steps:
 - task: DockerCompose@0
   inputs:
     dockerComposeFile: 'docker-compose.yml'
     action: 'build'
+  displayName: 'Compose build'
 
 - script: |
     docker login -u $(dockerId) -p $(dockerPassword) $(dockerid).azurecr.io
@@ -22,3 +24,4 @@ variables:
     
   displayName: 'Publish to Azure Container Registry'
 
+    
