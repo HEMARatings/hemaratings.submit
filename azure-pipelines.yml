@@ -10,10 +10,8 @@ variables:
   imageName: '$(dockerId).azurecr.io/hemaratings-submitter'
 
 steps:
-#- script: docker build -f docker/django/Dockerfile -t $(imageName) .
-  #displayName: 'docker build'
-- script: docker-compose -f docker-compose.yml up -d
-  displayName: 'docker compose'
+- script: docker-compose -f docker-compose.yml build
+  displayName: 'compose build'
 
 - script: |
     docker login -u $(dockerId) -p $(dockerPassword) $(dockerid).azurecr.io
@@ -22,3 +20,7 @@ steps:
     docker push $(imageName)
     
   displayName: 'Publish to Azure Container Registry'
+
+
+- script: docker-compose -f docker-compose.yml up -d
+  displayName: 'compose up'
