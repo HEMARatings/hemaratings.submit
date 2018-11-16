@@ -13,7 +13,7 @@ steps:
 - task: DockerCompose@0
   inputs:
     dockerComposeFile: 'docker-compose.yml'
-    action: 'build'
+    action: 'build Services'
     dockerComposeFileArgs: REDIS_URI=redis://redis:6379
   displayName: 'Compose build'
 
