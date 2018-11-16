@@ -19,7 +19,6 @@ steps:
 
 - script: |
     docker login -u $(dockerId) -p $(dockerPassword) $(dockerid).azurecr.io
-    docker tag hemaratingssubmit  $(imageName):$(build.buildId)
     docker tag hemaratingssubmit  $(imageName):latest
     docker push $(imageName)
     
