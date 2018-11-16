@@ -21,6 +21,7 @@ steps:
     
   displayName: 'Publish to Azure Container Registry'
 
-
-- script: docker-compose -f docker-compose.yml up -d
-  displayName: 'compose up'
+- task: DockerCompose@0
+  inputs:
+    dockerComposeFile: 'docker-compose.yml'
+    action: 'run'
