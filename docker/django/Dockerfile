@@ -33,7 +33,7 @@ COPY ./config ${APP_DIR}/config
 RUN ln -s ${APP_DIR}/config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf \
     && rm /etc/nginx/sites-enabled/default \
     && rm /etc/nginx/nginx.conf  \
-    && ln -s ${APP_DIR}/config/nginx/nginx.conf /etc/nginx/sites-enabled/default \
+    && ln -s ${APP_DIR}/config/dev/nginx.conf /etc/nginx/sites-enabled/default \
     && ln -s ${APP_DIR}/config/nginx/base.conf /etc/nginx/nginx.conf
 
 ADD ./backend ${APP_DIR}/backend
